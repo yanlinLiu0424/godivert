@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/yanlinLiu0424/go-divert/header"
+	"github.com/yanlinLiu0424/godivert/header"
 )
 
 // Represents a packet

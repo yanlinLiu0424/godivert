@@ -1,3 +1,3 @@
-module github.com/yanlinLiu0424/go-divert
+module github.com/yanlinLiu0424/godivert
 
 go 1.18
