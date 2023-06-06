@@ -7,7 +7,7 @@ WinDivert is a user-mode packet capture-and-divert package for Windows.
 ## Installation
 
 ```bash
-go get github.com/yanlinLiu0424/godivert"
+go get github.com/yanlinLiu0424/go-divert
 ```
 
 ## Introduction
@@ -75,11 +75,11 @@ package main
 import (
 	"fmt"
 
-	"github.com/yanlinLiu0424/godivert"
+	"github.com/yanlinLiu0424/go-divert/windivert"
 )
 
 func main() {
-	winDivert, err := godivert.NewWinDivertHandle("true")
+	winDivert, err := windivert.NewWinDivertHandle("true")
 	if err != nil {
 		panic(err)
 	}
@@ -109,12 +109,12 @@ import (
 	"net"
 	"time"
 
-	"github.com/yanlinLiu0424/godivert"
+	"github.com/yanlinLiu0424/go-divert/windivert"
 )
 
 var cloudflareDNS = net.ParseIP("8.8.4.4")
 
-func checkPacket(wd *godivert.WinDivertHandle, packetChan <-chan *godivert.Packet) {
+func checkPacket(wd *windivert.WinDivertHandle, packetChan <-chan *windivert.Packet) {
 	for packet := range packetChan {
 		if !packet.DstIP().Equal(cloudflareDNS) {
 			log.Print(packet)
@@ -124,7 +124,7 @@ func checkPacket(wd *godivert.WinDivertHandle, packetChan <-chan *godivert.Packe
 }
 
 func main() {
-	winDivert, err := godivert.NewWinDivertHandle("icmp")
+	winDivert, err := windivert.NewWinDivertHandle("icmp")
 	if err != nil {
 		panic(err)
 	}
@@ -147,7 +147,7 @@ Forbid all ICMP packets to reach 1.1.1.1 for 1 minute.
 Try it :
 
 ```bash
-ping 1.1.1.1
+ping 8.8.4.4
 ```
 
 ### Packet Count
@@ -159,20 +159,20 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/yanlinLiu0424/godivert"
-	"github.com/yanlinLiu0424/godivert/header"
+	"github.com/yanlinLiu0424/go-divert/header"
+	"github.com/yanlinLiu0424/go-divert/windivert"
 )
 
 var icmpv4, icmpv6, udp, tcp, unknown, served uint
 
-func checkPacket(wd *godivert.WinDivertHandle, packetChan <-chan *godivert.Packet) {
+func checkPacket(wd *windivert.WinDivertHandle, packetChan <-chan *windivert.Packet) {
 	for packet := range packetChan {
 		countPacket(packet)
 		wd.Send(packet)
 	}
 }
 
-func countPacket(packet *godivert.Packet) {
+func countPacket(packet *windivert.Packet) {
 	served++
 	switch packet.NextHeaderType() {
 	case header.ICMPv4:
@@ -189,7 +189,7 @@ func countPacket(packet *godivert.Packet) {
 }
 
 func main() {
-	winDivert, err := godivert.NewWinDivertHandle("true")
+	winDivert, err := windivert.NewWinDivertHandle("true")
 	if err != nil {
 		panic(err)
 	}

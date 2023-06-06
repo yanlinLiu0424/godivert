@@ -4,20 +4,20 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/yanlinLiu0424/godivert"
-	"github.com/yanlinLiu0424/godivert/header"
+	"github.com/yanlinLiu0424/go-divert/header"
+	"github.com/yanlinLiu0424/go-divert/windivert"
 )
 
 var icmpv4, icmpv6, udp, tcp, unknown, served uint
 
-func checkPacket(wd *godivert.WinDivertHandle, packetChan <-chan *godivert.Packet) {
+func checkPacket(wd *windivert.WinDivertHandle, packetChan <-chan *windivert.Packet) {
 	for packet := range packetChan {
 		countPacket(packet)
 		wd.Send(packet)
 	}
 }
 
-func countPacket(packet *godivert.Packet) {
+func countPacket(packet *windivert.Packet) {
 	served++
 	switch packet.NextHeaderType() {
 	case header.ICMPv4:
@@ -34,7 +34,7 @@ func countPacket(packet *godivert.Packet) {
 }
 
 func main() {
-	winDivert, err := godivert.NewWinDivertHandle("true")
+	winDivert, err := windivert.NewWinDivertHandle("true")
 	if err != nil {
 		panic(err)
 	}

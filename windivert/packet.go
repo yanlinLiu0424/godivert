@@ -1,10 +1,10 @@
-package godivert
+package windivert
 
 import (
 	"fmt"
 	"net"
 
-	"github.com/yanlinLiu0424/godivert/header"
+	"github.com/yanlinLiu0424/go-divert/header"
 )
 
 // Represents a packet

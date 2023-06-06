@@ -3,11 +3,11 @@ package main
 import (
 	"fmt"
 
-	"github.com/yanlinLiu0424/godivert"
+	"github.com/yanlinLiu0424/go-divert/windivert"
 )
 
 func main() {
-	winDivert, err := godivert.NewWinDivertHandle("true")
+	winDivert, err := windivert.NewWinDivertHandle("true")
 	if err != nil {
 		panic(err)
 	}

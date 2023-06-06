@@ -1,4 +1,4 @@
-package godivert
+package windivert
 
 import "fmt"
 

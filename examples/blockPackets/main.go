@@ -5,12 +5,12 @@ import (
 	"net"
 	"time"
 
-	"github.com/yanlinLiu0424/godivert"
+	"github.com/yanlinLiu0424/go-divert/windivert"
 )
 
 var cloudflareDNS = net.ParseIP("8.8.4.4")
 
-func checkPacket(wd *godivert.WinDivertHandle, packetChan <-chan *godivert.Packet) {
+func checkPacket(wd *windivert.WinDivertHandle, packetChan <-chan *windivert.Packet) {
 	for packet := range packetChan {
 		if !packet.DstIP().Equal(cloudflareDNS) {
 			log.Print(packet)
@@ -20,7 +20,7 @@ func checkPacket(wd *godivert.WinDivertHandle, packetChan <-chan *godivert.Packe
 }
 
 func main() {
-	winDivert, err := godivert.NewWinDivertHandle("icmp")
+	winDivert, err := windivert.NewWinDivertHandle("icmp")
 	if err != nil {
 		panic(err)
 	}
