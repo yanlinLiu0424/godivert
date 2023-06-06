@@ -4,7 +4,8 @@ import (
 	"log"
 	"net"
 	"time"
-	"yanlinLiu0424/godivert"
+
+	"github.com/yanlinLiu0424/godivert"
 )
 
 var cloudflareDNS = net.ParseIP("8.8.4.4")

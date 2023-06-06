@@ -1,3 +1,3 @@
-module yanlinLiu0424/godivert
+module github.com/yanlinLiu0424/godivert
 
 go 1.18
