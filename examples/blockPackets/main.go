@@ -1,16 +1,18 @@
 package main
 
 import (
+	"log"
 	"net"
 	"time"
-	"github.com/williamfhe/godivert"
+	"yanlinLiu0424/godivert"
 )
 
-var cloudflareDNS = net.ParseIP("1.1.1.1")
+var cloudflareDNS = net.ParseIP("8.8.4.4")
 
 func checkPacket(wd *godivert.WinDivertHandle, packetChan <-chan *godivert.Packet) {
 	for packet := range packetChan {
 		if !packet.DstIP().Equal(cloudflareDNS) {
+			log.Print(packet)
 			packet.Send(wd)
 		}
 	}

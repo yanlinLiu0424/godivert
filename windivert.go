@@ -106,8 +106,8 @@ func (wd *WinDivertHandle) Recv() (*Packet, error) {
 	success, _, err := winDivertRecv.Call(wd.handle,
 		uintptr(unsafe.Pointer(&packetBuffer[0])),
 		uintptr(PacketBufferSize),
-		uintptr(unsafe.Pointer(&addr)),
-		uintptr(unsafe.Pointer(&packetLen)))
+		uintptr(unsafe.Pointer(&packetLen)),
+		uintptr(unsafe.Pointer(&addr)))
 
 	if success == 0 {
 		return nil, err
@@ -134,8 +134,8 @@ func (wd *WinDivertHandle) Send(packet *Packet) (uint, error) {
 	success, _, err := winDivertSend.Call(wd.handle,
 		uintptr(unsafe.Pointer(&(packet.Raw[0]))),
 		uintptr(packet.PacketLen),
-		uintptr(unsafe.Pointer(packet.Addr)),
-		uintptr(unsafe.Pointer(&sendLen)))
+		uintptr(unsafe.Pointer(&sendLen)),
+		uintptr(unsafe.Pointer(packet.Addr)))
 
 	if success == 0 {
 		return 0, err
