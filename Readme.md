@@ -7,7 +7,7 @@ WinDivert is a user-mode packet capture-and-divert package for Windows.
 ## Installation
 
 ```bash
-go get github.com/yanlinLiu0424/go-divert
+go get github.com/yanlinLiu0424/godivert
 ```
 
 ## Introduction
