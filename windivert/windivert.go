@@ -132,9 +132,9 @@ func (wd *WinDivertHandle) Recv() (*Packet, error) {
 	return packet, nil
 }
 
+/*
 // Divert a packet from the Network Stack
 // https://reqrypt.org/windivert-doc.html#divert_recv_ex
-/*
 func (wd *WinDivertHandle) RecvEx() ([]*Packet, error) {
 	if !wd.open {
 		return nil, errors.New("can't receiveEx, the handle isn't open")
@@ -166,6 +166,7 @@ func (wd *WinDivertHandle) RecvEx() ([]*Packet, error) {
 	return packets, nil
 }
 */
+
 // Inject the packet on the Network Stack
 // https://reqrypt.org/windivert-doc.html#divert_send
 func (wd *WinDivertHandle) Send(packet *Packet) (uint, error) {
