@@ -19,26 +19,11 @@ func checkPacketEx(wd *windivert.WinDivertHandle, packetChan <-chan *windivert.P
 	}
 }
 func TestXxx(t *testing.T) {
-	winDivert, err := windivert.NewWinDivertHandle("udp.DstPort==55954")
+	winDivert, err := windivert.NewWinDivertHandle("!loopback && ip")
 	if err != nil {
 		t.Fatal(err)
 	}
-	v, err := winDivert.GetParam(windivert.WINDIVERT_PARAM_QUEUE_SIZE)
-	if err != nil {
-		t.Fatal(err)
-	}
-	log.Print(v)
 
-	v, err = winDivert.GetParam(windivert.WINDIVERT_PARAM_QUEUE_LENGTH)
-	if err != nil {
-		t.Fatal(err)
-	}
-	log.Print(v)
-	v, err = winDivert.GetParam(windivert.WINDIVERT_PARAM_QUEUE_TIME)
-	if err != nil {
-		t.Fatal(err)
-	}
-	log.Print(v)
 	defer winDivert.Close()
 	err = winDivert.SetParam(windivert.WINDIVERT_PARAM_QUEUE_SIZE, windivert.WINDIVERT_PARAM_QUEUE_SIZE_MAX)
 	if err != nil {
@@ -53,30 +38,12 @@ func TestXxx(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	v, err = winDivert.GetParam(windivert.WINDIVERT_PARAM_QUEUE_SIZE)
-	if err != nil {
-		t.Fatal(err)
-	}
-	log.Print(v)
-
-	v, err = winDivert.GetParam(windivert.WINDIVERT_PARAM_QUEUE_LENGTH)
-	if err != nil {
-		t.Fatal(err)
-	}
-	log.Print(v)
-	v, err = winDivert.GetParam(windivert.WINDIVERT_PARAM_QUEUE_TIME)
-	if err != nil {
-		t.Fatal(err)
-	}
-	log.Print(v)
-
-	packetChan, err := winDivert.PacketExs()
+	packetChan, err := winDivert.Packets()
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	go checkPacketEx(winDivert, packetChan)
-
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	<-c

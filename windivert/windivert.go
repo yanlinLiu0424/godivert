@@ -134,6 +134,7 @@ func (wd *WinDivertHandle) Recv() (*Packet, error) {
 
 // Divert a packet from the Network Stack
 // https://reqrypt.org/windivert-doc.html#divert_recv_ex
+/*
 func (wd *WinDivertHandle) RecvEx() ([]*Packet, error) {
 	if !wd.open {
 		return nil, errors.New("can't receiveEx, the handle isn't open")
@@ -156,32 +157,15 @@ func (wd *WinDivertHandle) RecvEx() ([]*Packet, error) {
 	if success == 0 {
 		return nil, err
 	}
-	//m := make([]WinDivertAddress, 0)
-	//m = append(m, addr...)
 
 	packets, err := wd.HelperParsePacket(packetBuffer, packetLen, addr)
 	if err != nil {
 		return nil, err
 	}
-	//packets := make([]*Packet, 0)
-	/*
-		packet := &Packet{
-			Raw:       packetBuffer[:(i+1)*PacketBufferSize],
-			Addr:      &addr,
-			PacketLen: packetLen,
-		}
-		packets = append(packets, packet)
-	*/
-	/*
-		packet := &Packet{
-			Raw:       packetBuffer[:packetLen],
-			Addr:      &addr,
-			PacketLen: packetLen,
-		}*/
 
 	return packets, nil
 }
-
+*/
 // Inject the packet on the Network Stack
 // https://reqrypt.org/windivert-doc.html#divert_send
 func (wd *WinDivertHandle) Send(packet *Packet) (uint, error) {
@@ -233,6 +217,8 @@ func HelperCheckFilter(filter string) (bool, int) {
 	return false, int(errorPos)
 }
 
+// GetParam
+// https://reqrypt.org/windivert-doc.html#divert_get_param
 func (wd *WinDivertHandle) GetParam(param WINDIVERT_PARAM) (uint64, error) {
 	var value uint64
 	success, _, err := winDivertGetParam.Call(
@@ -246,6 +232,9 @@ func (wd *WinDivertHandle) GetParam(param WINDIVERT_PARAM) (uint64, error) {
 
 	return value, nil
 }
+
+// SetParam
+// https://reqrypt.org/windivert-doc.html#divert_set_param
 func (wd *WinDivertHandle) SetParam(param WINDIVERT_PARAM, value uint64) error {
 	success, _, err := winDivertSetParam.Call(
 		wd.handle,
@@ -259,6 +248,8 @@ func (wd *WinDivertHandle) SetParam(param WINDIVERT_PARAM, value uint64) error {
 	return nil
 }
 
+//not implement
+/*
 func (wd *WinDivertHandle) HelperParsePacket(p []byte, packlen uint, addr [10]WinDivertAddress) ([]*Packet, error) {
 	packets := make([]*Packet, 0)
 	count := -1
@@ -311,8 +302,11 @@ func (wd *WinDivertHandle) HelperParsePacket(p []byte, packlen uint, addr [10]Wi
 	}
 
 	return packets, nil
-}
+}*/
 
+// Take a packet and compare it with the given filter
+// Returns true if the packet matches the filter
+// https://reqrypt.org/windivert-doc.html#divert_helper_eval_filter
 func HelperEvalFilter(packet *Packet, filter string) (bool, error) {
 	filterBytePtr, err := syscall.BytePtrFromString(filter)
 	if err != nil {
@@ -339,17 +333,19 @@ func (wd *WinDivertHandle) recvLoop(packetChan chan<- *Packet) {
 	for wd.open {
 		packet, err := wd.Recv()
 		if err != nil {
-			panic(err)
+			continue
 			//close(packetChan)
-			break
+			//break
 		}
 
 		packetChan <- packet
 	}
 }
 
+//not implement
 // A loop that capture packets by calling Recv and sends them on a channel as long as the handle is open
 // If Recv() returns an error, the loop is stopped and the channel is closed
+/*
 func (wd *WinDivertHandle) recvLoopEx(packetChan chan<- *Packet) {
 	for wd.open {
 		packet, err := wd.RecvEx()
@@ -364,6 +360,7 @@ func (wd *WinDivertHandle) recvLoopEx(packetChan chan<- *Packet) {
 		//packetChan <- packet
 	}
 }
+*/
 
 // Create a new channel that will be used to pass captured packets and returns it calls recvLoop to maintain a loop
 func (wd *WinDivertHandle) Packets() (chan *Packet, error) {
@@ -375,7 +372,9 @@ func (wd *WinDivertHandle) Packets() (chan *Packet, error) {
 	return packetChan, nil
 }
 
+//not implement
 // Create a new channel that will be used to pass captured packets and returns it calls recvLoop to maintain a loop
+/*
 func (wd *WinDivertHandle) PacketExs() (chan *Packet, error) {
 	if !wd.open {
 		return nil, errors.New("the handle isn't open")
@@ -384,3 +383,4 @@ func (wd *WinDivertHandle) PacketExs() (chan *Packet, error) {
 	go wd.recvLoopEx(packetChan)
 	return packetChan, nil
 }
+*/
