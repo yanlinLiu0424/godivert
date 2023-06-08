@@ -248,61 +248,43 @@ func (wd *WinDivertHandle) SetParam(param WINDIVERT_PARAM, value uint64) error {
 	return nil
 }
 
-//not implement
-/*
-func (wd *WinDivertHandle) HelperParsePacket(p []byte, packlen uint, addr [10]WinDivertAddress) ([]*Packet, error) {
-	packets := make([]*Packet, 0)
-	count := -1
-	currentpacket := p[:]
-	nextpacket := make([]byte, PacketBufferSize)
-	var nextlen uint
-	for {
-		count++
-		//var packetpointer uint
-		//packetBuffer := make([]byte, PacketBufferSize)
-		//	var len uint
-		success, _, err := winDivertHelperParsePacket.Call(
-			uintptr(unsafe.Pointer(&currentpacket[0])),
-			uintptr(packlen),
-			uintptr(0),
-			uintptr(0),
-			uintptr(0),
-			uintptr(0),
-			uintptr(0),
-			uintptr(0),
-			uintptr(0),
-			uintptr(0), //uintptr(unsafe.Pointer(&packetpointer)),
-			uintptr(0), //uintptr(unsafe.Pointer(&len)),
-			uintptr(unsafe.Pointer(&nextpacket)),
-			uintptr(unsafe.Pointer(&nextlen)),
-		)
-		//data := *(*[]byte)(unsafe.Pointer(&packetpointer))
-		if success == 0 {
-			return nil, err
-		}
+// HelperParsePacket
+// https://reqrypt.org/windivert-doc.html#divert_helper_parse_packet
+func (wd *WinDivertHandle) HelperParsePacket(p []byte) (PayLoad, error) {
+	packets := make(PayLoad, 0)
+	packlen := len(p)
 
-		packet := &Packet{}
-		packet.Addr = &addr[count]
-		if nextlen == 0 {
-			packet.Raw = p[:packlen]
-			packet.PacketLen = packlen
-		} else {
-			leave := packlen - nextlen
-			packet.Raw = p[:leave]
-			packet.PacketLen = leave
-		}
-		currentpacket = nextpacket
-		packlen = nextlen
-		//p := &Packet{Raw: data[:], Addr: &addr[count]}
-		packets = append(packets, packet)
-		if packlen == 0 {
-			break
-		}
-
+	packetpointer := make(PayLoad, 1500)
+	var len uint
+	success, _, err := winDivertHelperParsePacket.Call(
+		uintptr(unsafe.Pointer(&p[0])),
+		uintptr(packlen),
+		uintptr(0),
+		uintptr(0),
+		uintptr(0),
+		uintptr(0),
+		uintptr(0),
+		uintptr(0),
+		uintptr(0),
+		uintptr(unsafe.Pointer(&packetpointer[0])), //uintptr(0), uintptr(unsafe.Pointer(&packetpointer)),
+		uintptr(unsafe.Pointer(&len)),
+		uintptr(0), //uintptr(unsafe.Pointer(&nextpacketpointer)),
+		uintptr(0), //uintptr(unsafe.Pointer(&packlen)),
+	)
+	if success == 0 {
+		return nil, err
+	}
+	if len != 0 {
+		packets = *(*PayLoad)(unsafe.Pointer(&packetpointer))
 	}
 
-	return packets, nil
-}*/
+	/*if nextpacketpointer != 0 {
+		packet := *(*[]byte)(unsafe.Pointer(&nextpacketpointer))
+		currentpacket = packet
+	}*/
+
+	return packets[:len], nil
+}
 
 // Take a packet and compare it with the given filter
 // Returns true if the packet matches the filter

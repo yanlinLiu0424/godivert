@@ -1,6 +1,7 @@
 package windivert
 
 type Direction bool
+type PayLoad []byte
 
 const (
 	PacketBufferSize   = 1500
