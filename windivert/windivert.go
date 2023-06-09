@@ -252,9 +252,7 @@ func (wd *WinDivertHandle) SetParam(param WINDIVERT_PARAM, value uint64) error {
 // HelperParsePacket
 // https://reqrypt.org/windivert-doc.html#divert_helper_parse_packet
 func (wd *WinDivertHandle) HelperParsePacket(p []byte) (PayLoad, error) {
-	packets := make(PayLoad, 0)
 	packlen := len(p)
-
 	packetpointer := make(PayLoad, 1500)
 	var len uint
 	success, _, err := winDivertHelperParsePacket.Call(
@@ -267,7 +265,7 @@ func (wd *WinDivertHandle) HelperParsePacket(p []byte) (PayLoad, error) {
 		uintptr(0),
 		uintptr(0),
 		uintptr(0),
-		uintptr(unsafe.Pointer(&packetpointer[0])), //uintptr(0), uintptr(unsafe.Pointer(&packetpointer)),
+		uintptr(unsafe.Pointer(&packetpointer)), //uintptr(0), uintptr(unsafe.Pointer(&packetpointer)),
 		uintptr(unsafe.Pointer(&len)),
 		uintptr(0), //uintptr(unsafe.Pointer(&nextpacketpointer)),
 		uintptr(0), //uintptr(unsafe.Pointer(&packlen)),
@@ -275,16 +273,7 @@ func (wd *WinDivertHandle) HelperParsePacket(p []byte) (PayLoad, error) {
 	if success == 0 {
 		return nil, err
 	}
-	if len != 0 {
-		packets = *(*PayLoad)(unsafe.Pointer(&packetpointer))
-	}
-
-	/*if nextpacketpointer != 0 {
-		packet := *(*[]byte)(unsafe.Pointer(&nextpacketpointer))
-		currentpacket = packet
-	}*/
-
-	return packets[:len], nil
+	return packetpointer[:len], nil
 }
 
 // Take a packet and compare it with the given filter
