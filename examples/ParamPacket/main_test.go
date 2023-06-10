@@ -28,15 +28,15 @@ func TestXxx(t *testing.T) {
 	}
 
 	defer winDivert.Close()
-	err = winDivert.SetParam(windivert.WINDIVERT_PARAM_QUEUE_SIZE, windivert.WINDIVERT_PARAM_QUEUE_SIZE_MAX)
+	err = winDivert.SetParam(windivert.WinDivertParamQueueSize, windivert.WinDivertParamQueueSizeMax)
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = winDivert.SetParam(windivert.WINDIVERT_PARAM_QUEUE_LENGTH, windivert.WINDIVERT_PARAM_QUEUE_LENGTH_MAX)
+	err = winDivert.SetParam(windivert.WinDivertParamQueueLength, windivert.WinDivertParamQueueLengthMax)
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = winDivert.SetParam(windivert.WINDIVERT_PARAM_QUEUE_TIME, windivert.WINDIVERT_PARAM_QUEUE_TIME_MAX)
+	err = winDivert.SetParam(windivert.WinDivertParamQueueTime, windivert.WinDivertParamQueueTimeMax)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -58,7 +58,7 @@ func TestGetParam(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer winDivert.Close()
-	v, err := winDivert.GetParam(windivert.WINDIVERT_PARAM_QUEUE_SIZE)
+	v, err := winDivert.GetParam(windivert.WinDivertParamQueueSize)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -70,7 +70,7 @@ func TestSetParam(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer winDivert.Close()
-	err = winDivert.SetParam(windivert.WINDIVERT_PARAM_QUEUE_SIZE, windivert.WINDIVERT_PARAM_QUEUE_SIZE_MAX)
+	err = winDivert.SetParam(windivert.WinDivertParamQueueSize, windivert.WinDivertParamQueueSizeMax)
 	if err != nil {
 		t.Fatal(err)
 	}

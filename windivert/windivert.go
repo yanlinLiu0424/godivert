@@ -220,7 +220,7 @@ func HelperCheckFilter(filter string) (bool, int) {
 
 // GetParam
 // https://reqrypt.org/windivert-doc.html#divert_get_param
-func (wd *WinDivertHandle) GetParam(param WINDIVERT_PARAM) (uint64, error) {
+func (wd *WinDivertHandle) GetParam(param WinDivertParam) (uint64, error) {
 	var value uint64
 	success, _, err := winDivertGetParam.Call(
 		wd.handle,
@@ -236,7 +236,7 @@ func (wd *WinDivertHandle) GetParam(param WINDIVERT_PARAM) (uint64, error) {
 
 // SetParam
 // https://reqrypt.org/windivert-doc.html#divert_set_param
-func (wd *WinDivertHandle) SetParam(param WINDIVERT_PARAM, value uint64) error {
+func (wd *WinDivertHandle) SetParam(param WinDivertParam, value uint64) error {
 	success, _, err := winDivertSetParam.Call(
 		wd.handle,
 		uintptr(param),
