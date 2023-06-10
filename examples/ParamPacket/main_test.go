@@ -12,6 +12,7 @@ import (
 func checkPacketEx(wd *windivert.WinDivertHandle, packetChan <-chan *windivert.Packet) {
 	for packet := range packetChan {
 		go func(wd *windivert.WinDivertHandle, packet *windivert.Packet) {
+
 			p, err := wd.HelperParsePacket(packet.Raw)
 			if err == nil {
 				log.Print(p)
@@ -22,7 +23,7 @@ func checkPacketEx(wd *windivert.WinDivertHandle, packetChan <-chan *windivert.P
 	}
 }
 func TestXxx(t *testing.T) {
-	winDivert, err := windivert.NewWinDivertHandle("!loopback && udp.DstPort==55954")
+	winDivert, err := windivert.NewWinDivertHandle("!loopback && ip")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -75,4 +76,12 @@ func TestSetParam(t *testing.T) {
 		t.Fatal(err)
 	}
 
+}
+
+func TestXX(t *testing.T) {
+	a := make([]int, 20)
+	a = append(a, 123)
+	log.Print(&a[0])
+	log.Print(&a[1])
+	log.Printf("%p", a)
 }
