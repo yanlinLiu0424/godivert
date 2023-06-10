@@ -77,11 +77,3 @@ func TestSetParam(t *testing.T) {
 	}
 
 }
-
-func TestXX(t *testing.T) {
-	a := make([]int, 20)
-	a = append(a, 123)
-	log.Print(&a[0])
-	log.Print(&a[1])
-	log.Printf("%p", a)
-}
