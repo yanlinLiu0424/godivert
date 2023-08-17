@@ -65,6 +65,10 @@ func LoadDLL(path64, path32 string) {
 // The string parameter is the fiter that packets have to match
 // https://reqrypt.org/windivert-doc.html#divert_open
 func NewWinDivertHandle(filter string) (*WinDivertHandle, error) {
+	err := winDivertOpen.Find()
+	if err != nil {
+		return nil, err
+	}
 	return NewWinDivertHandleWithFlags(filter, 0)
 }
 
