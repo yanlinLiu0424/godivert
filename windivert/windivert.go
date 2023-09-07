@@ -113,13 +113,13 @@ func (wd *WinDivertHandle) Recv() (*Packet, error) {
 		return nil, errors.New("can't receive, the handle isn't open")
 	}
 
-	packetBuffer := make([]byte, PacketBufferSize)
+	packetBuffer := make([]byte, MaxPacketBufferSize)
 
 	var packetLen uint
 	var addr WinDivertAddress
 	success, _, err := winDivertRecv.Call(wd.handle,
 		uintptr(unsafe.Pointer(&packetBuffer[0])),
-		uintptr(PacketBufferSize),
+		uintptr(MaxPacketBufferSize),
 		uintptr(unsafe.Pointer(&packetLen)),
 		uintptr(unsafe.Pointer(&addr)))
 
