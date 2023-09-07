@@ -257,7 +257,7 @@ func (wd *WinDivertHandle) SetParam(param WinDivertParam, value uint64) error {
 // https://reqrypt.org/windivert-doc.html#divert_helper_parse_packet
 func (wd *WinDivertHandle) HelperParsePacket(p []byte) (PayLoad, error) {
 	packlen := len(p)
-	packetpointer := make(PayLoad, 1500)
+	packetpointer := make(PayLoad, MaxPacketBufferSize)
 	var len uint
 	success, _, err := winDivertHelperParsePacket.Call(
 		uintptr(unsafe.Pointer(&p[0])),
