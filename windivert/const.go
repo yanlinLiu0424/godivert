@@ -4,9 +4,9 @@ type Direction bool
 type PayLoad []byte
 
 const (
-	PacketBufferSize   = 1500
-	PacketChanCapacity = 256
-
+	PacketBufferSize                     = 1500
+	PacketChanCapacity                   = 256
+	MaxPacketBufferSize                  = 65535
 	WinDivertDirectionOutbound Direction = false
 	WinDivertDirectionInbound  Direction = true
 )
