@@ -11,7 +11,8 @@ import (
 func checkPacket(wd *windivert.WinDivertHandle, packetChan <-chan *windivert.Packet) {
 	for packet := range packetChan {
 		go func(wd *windivert.WinDivertHandle, packet *windivert.Packet) {
-			log.Print(packet)
+			raw, _ := wd.HelperParsePacket(packet.Raw)
+			log.Print(raw)
 			packet.Send(wd)
 		}(wd, packet)
 
