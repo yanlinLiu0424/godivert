@@ -1,60 +1,210 @@
 package windivert
 
-import "fmt"
+import "unsafe"
 
 // Represents a WinDivertAddress struct
 // See : https://reqrypt.org/windivert-doc.html#divert_address
 // As go doesn't not support bit fields
 // we use a little trick to get the Direction, Loopback, Import and PseudoChecksum fields
-type WinDivertAddress struct {
+type Ethernet struct {
+	InterfaceIndex    uint32
+	SubInterfaceIndex uint32
+	_                 [7]uint64
+}
+
+type Network struct {
+	InterfaceIndex    uint32
+	SubInterfaceIndex uint32
+	_                 [7]uint64
+}
+
+type Socket struct {
+	EndpointID       uint64
+	ParentEndpointID uint64
+	ProcessID        uint32
+	LocalAddress     [16]uint8
+	RemoteAddress    [16]uint8
+	LocalPort        uint16
+	RemotePort       uint16
+	Protocol         uint8
+	_                [3]uint8
+	_                uint32
+}
+
+type Flow struct {
+	EndpointID       uint64
+	ParentEndpointID uint64
+	ProcessID        uint32
+	LocalAddress     [16]uint8
+	RemoteAddress    [16]uint8
+	LocalPort        uint16
+	RemotePort       uint16
+	Protocol         uint8
+	_                [3]uint8
+	_                uint32
+}
+
+type Reflect struct {
+	TimeStamp int64
+	ProcessID uint32
+	layer     uint32
+	Flags     uint64
+	Priority  int16
+	_         int16
+	_         int32
+	_         [4]uint64
+}
+
+func (r *Reflect) Layer() Layer {
+	return Layer(r.layer)
+}
+
+type Address struct {
 	Timestamp int64
-	IfIdx     uint32
-	SubIfIdx  uint32
-	Data      uint8
+	layer     uint8
+	event     uint8
+	Flags     uint8
+	_         uint8
+	length    uint32
+	union     [64]uint8
 }
 
-func (w *WinDivertAddress) String() string {
-	return fmt.Sprintf("{\n"+
-		"\t\tTimestamp=%d\n"+
-		"\t\tInteface={IfIdx=%d SubIfIdx=%d}\n"+
-		"\t\tDirection=%v\n"+
-		"\t\tLoopback=%t\n"+
-		"\t\tImpostor=%t\n"+
-		"\t\tPseudoChecksum={IP=%t TCP=%t UDP=%t}\n"+
-		"\t}",
-		w.Timestamp, w.IfIdx, w.SubIfIdx, w.Direction(), w.Loopback(), w.Impostor(),
-		w.PseudoIPChecksum(), w.PseudoTCPChecksum(), w.PseudoUDPChecksum())
+func (a *Address) Layer() Layer {
+	return Layer(a.layer)
 }
 
-// Returns the direction of the packet
-// WinDivertDirectionInbound (true) for inbounds packets
-// WinDivertDirectionOutbounds (false) for outbounds packets
-func (w *WinDivertAddress) Direction() Direction {
-	return Direction(w.Data&0x1 == 1)
+func (a *Address) SetLayer(layer Layer) {
+	a.layer = uint8(layer)
 }
 
-// Returns true if the packet is a loopback packet
-func (w *WinDivertAddress) Loopback() bool {
-	return (w.Data>>1)&0x1 == 1
+func (a *Address) Event() Event {
+	return Event(a.event)
 }
 
-// Returns true if the packet is an impostor
-// See https://reqrypt.org/windivert-doc.html#divert_address for more information
-func (w *WinDivertAddress) Impostor() bool {
-	return (w.Data>>2)&0x1 == 1
+func (a *Address) SetEvent(event Event) {
+	a.event = uint8(event)
 }
 
-// Returns true if the packet uses a pseudo IP checksum
-func (w *WinDivertAddress) PseudoIPChecksum() bool {
-	return (w.Data>>3)&0x1 == 1
+func (a *Address) Sniffed() bool {
+	return (a.Flags & uint8(0x01<<0)) == uint8(0x01<<0)
 }
 
-// Returns true if the packet uses a pseudo TCP checksum
-func (w *WinDivertAddress) PseudoTCPChecksum() bool {
-	return (w.Data>>4)&0x1 == 1
+func (a *Address) SetSniffed() {
+	a.Flags |= uint8(0x01 << 0)
 }
 
-// Returns true if the packet uses a pseudo UDP checksum
-func (w *WinDivertAddress) PseudoUDPChecksum() bool {
-	return (w.Data>>5)&0x1 == 1
+func (a *Address) UnsetSniffed() {
+	a.Flags &= ^uint8(0x01 << 0)
+}
+
+func (a *Address) Outbound() bool {
+	return (a.Flags & uint8(0x01<<1)) == uint8(0x01<<1)
+}
+
+func (a *Address) SetOutbound() {
+	a.Flags |= uint8(0x01 << 1)
+}
+
+func (a *Address) UnsetOutbound() {
+	a.Flags &= ^uint8(0x01 << 1)
+}
+
+func (a *Address) Loopback() bool {
+	return (a.Flags & uint8(0x01<<2)) == uint8(0x01<<2)
+}
+
+func (a *Address) SetLoopback() {
+	a.Flags |= uint8(0x01 << 2)
+}
+
+func (a *Address) UnsetLoopback() {
+	a.Flags &= ^uint8(0x01 << 2)
+}
+
+func (a *Address) Impostor() bool {
+	return (a.Flags & uint8(0x01<<3)) == uint8(0x01<<3)
+}
+
+func (a *Address) SetImpostor() {
+	a.Flags |= uint8(0x01 << 3)
+}
+
+func (a *Address) UnsetImpostor() {
+	a.Flags &= ^uint8(0x01 << 3)
+}
+
+func (a *Address) IPv6() bool {
+	return (a.Flags & uint8(0x01<<4)) == uint8(0x01<<4)
+}
+
+func (a *Address) SetIPv6() {
+	a.Flags |= uint8(0x01 << 4)
+}
+
+func (a *Address) UnsetIPv6() {
+	a.Flags &= ^uint8(0x01 << 4)
+}
+
+func (a *Address) IPChecksum() bool {
+	return (a.Flags & uint8(0x01<<5)) == uint8(0x01<<5)
+}
+
+func (a *Address) SetIPChecksum() {
+	a.Flags |= uint8(0x01 << 5)
+}
+
+func (a *Address) UnsetIPChecksum() {
+	a.Flags &= ^uint8(0x01 << 5)
+}
+
+func (a *Address) TCPChecksum() bool {
+	return (a.Flags & uint8(0x01<<6)) == uint8(0x01<<6)
+}
+
+func (a *Address) SetTCPChecksum() {
+	a.Flags |= uint8(0x01 << 6)
+}
+
+func (a *Address) UnsetTCPChecksum() {
+	a.Flags &= ^uint8(0x01 << 6)
+}
+
+func (a *Address) UDPChecksum() bool {
+	return (a.Flags & uint8(0x01<<7)) == uint8(0x01<<7)
+}
+
+func (a *Address) SetUDPChecksum() {
+	a.Flags |= uint8(0x01 << 7)
+}
+
+func (a *Address) UnsetUDPChecksum() {
+	a.Flags &= ^uint8(0x01 << 7)
+}
+
+func (a *Address) Length() uint32 {
+	return a.length >> 12
+}
+
+func (a *Address) SetLength(n uint32) {
+	a.length = n << 12
+}
+
+func (a *Address) Ethernet() *Ethernet {
+	return (*Ethernet)(unsafe.Pointer(&a.union))
+}
+
+func (a *Address) Network() *Network {
+	return (*Network)(unsafe.Pointer(&a.union))
+}
+
+func (a *Address) Socket() *Socket {
+	return (*Socket)(unsafe.Pointer(&a.union))
+}
+
+func (a *Address) Flow() *Flow {
+	return (*Flow)(unsafe.Pointer(&a.union))
+}
+
+func (a *Address) Reflect() *Reflect {
+	return (*Reflect)(unsafe.Pointer(&a.union))
 }

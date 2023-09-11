@@ -20,7 +20,7 @@ func checkPacket(wd *windivert.WinDivertHandle, packetChan <-chan *windivert.Pac
 }
 
 func main() {
-	winDivert, err := windivert.NewWinDivertHandle("true")
+	winDivert, err := windivert.NewWinDivertHandle("tcp.DstPort==55")
 	if err != nil {
 		panic(err)
 	}

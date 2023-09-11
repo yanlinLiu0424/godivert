@@ -20,17 +20,6 @@ func TestXxx(t *testing.T) {
 	}
 }
 
-func TestSzie(t *testing.T) {
-	addr := make([]WinDivertAddress, 100)
-	log.Print(uintptr(unsafe.Pointer(&addr)))
-
-	var addr1 [10]WinDivertAddress
-	log.Print(uintptr(unsafe.Pointer(&addr1)))
-	//log.Print(uintptr(unsafe.Pointer(&addr1[0])))
-	a := unsafe.Sizeof(addr1)
-	log.Print(a)
-
-}
 func TestX(t *testing.T) {
 
 	a := int(123)

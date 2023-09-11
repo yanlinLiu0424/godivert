@@ -10,7 +10,7 @@ import (
 // Represents a packet
 type Packet struct {
 	Raw       []byte
-	Addr      *WinDivertAddress
+	Addr      *Address
 	PacketLen uint
 
 	IpHdr      header.IPHeader
@@ -189,6 +189,7 @@ func (p *Packet) VerifyParsed() {
 	}
 }
 
+/*
 // Returns the Direction of the packet
 // WinDivertDirectionInbound (true) for inbound Packets
 // WinDivertDirectionOutbound (false) for outbound packets
@@ -196,7 +197,7 @@ func (p *Packet) VerifyParsed() {
 func (p *Packet) Direction() Direction {
 	return p.Addr.Direction()
 }
-
+*/
 // Check the packet with the filter
 // Returns true if the packet matches the filter
 func (p *Packet) EvalFilter(filter string) (bool, error) {

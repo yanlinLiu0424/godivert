@@ -116,7 +116,7 @@ func (wd *WinDivertHandle) Recv() (*Packet, error) {
 	packetBuffer := make([]byte, MaxPacketBufferSize)
 
 	var packetLen uint
-	var addr WinDivertAddress
+	var addr Address
 	success, _, err := winDivertRecv.Call(wd.handle,
 		uintptr(unsafe.Pointer(&packetBuffer[0])),
 		uintptr(MaxPacketBufferSize),
