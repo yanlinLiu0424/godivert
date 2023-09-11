@@ -12,39 +12,45 @@ import (
 func checkPacketEx(wd *windivert.WinDivertHandle, packetChan <-chan *windivert.Packet) {
 	for packet := range packetChan {
 		go func(wd *windivert.WinDivertHandle, packet *windivert.Packet) {
-
+			//wd.HelperParsePacket(packet.Raw)
+			/*srcip := packet.SrcIP().String()
+			destip := packet.DstIP().String()
+			srp, _ := packet.SrcPort()
+			dp, _ := packet.DstPort()
+			fmt.Print(srcip, destip, srp, dp)*/
 			p, err := wd.HelperParsePacket(packet.Raw)
 			if err == nil {
-				log.Print(p)
+				log.Printf("payload len:%v", len(p))
+				log.Printf("packet len:%v", packet.PacketLen)
 			}
 			wd.Send(packet)
 		}(wd, packet)
 
 	}
 }
-func TestXxx(t *testing.T) {
-	winDivert, err := windivert.NewWinDivertHandle("!loopback && ip")
+func main() {
+	winDivert, err := windivert.NewWinDivertHandle("tcp.DstPort==55")
 	if err != nil {
-		t.Fatal(err)
+		panic(err)
 	}
 
 	defer winDivert.Close()
-	err = winDivert.SetParam(windivert.WinDivertParamQueueSize, windivert.WinDivertParamQueueSizeMax)
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = winDivert.SetParam(windivert.WinDivertParamQueueLength, windivert.WinDivertParamQueueLengthMax)
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = winDivert.SetParam(windivert.WinDivertParamQueueTime, windivert.WinDivertParamQueueTimeMax)
-	if err != nil {
-		t.Fatal(err)
-	}
+	/*	err = winDivert.SetParam(windivert.WinDivertParamQueueSize, windivert.WinDivertParamQueueSizeMax)
+		if err != nil {
+			panic(err)
+		}
+		err = winDivert.SetParam(windivert.WinDivertParamQueueLength, windivert.WinDivertParamQueueLengthMax)
+		if err != nil {
+			panic(err)
+		}
+		err = winDivert.SetParam(windivert.WinDivertParamQueueTime, windivert.WinDivertParamQueueTimeMax)
+		if err != nil {
+			panic(err)
+		}*/
 
 	packetChan, err := winDivert.Packets()
 	if err != nil {
-		t.Fatal(err)
+		panic(err)
 	}
 
 	go checkPacketEx(winDivert, packetChan)
