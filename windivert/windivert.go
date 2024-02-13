@@ -2,7 +2,6 @@ package windivert
 
 import (
 	"errors"
-	"fmt"
 	"runtime"
 	"syscall"
 	"unsafe"
@@ -343,9 +342,6 @@ func (wd *WinDivertHandle) recvLoopEx(packetChan chan<- *Packet) {
 		bytes, addr, err := wd.RecvEx()
 		if err != nil {
 			continue
-		}
-		if len(addr) > 1 {
-			fmt.Printf("packet len:%v\n", len(addr))
 		}
 		switch len(addr) {
 		case 0:
