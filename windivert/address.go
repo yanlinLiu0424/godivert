@@ -1,21 +1,17 @@
 package windivert
 
-import "unsafe"
+import (
+	"log"
+	"unsafe"
+)
 
 // Represents a WinDivertAddress struct
 // See : https://reqrypt.org/windivert-doc.html#divert_address
 // As go doesn't not support bit fields
 // we use a little trick to get the Direction, Loopback, Import and PseudoChecksum fields
-type Ethernet struct {
-	InterfaceIndex    uint32
-	SubInterfaceIndex uint32
-	_                 [7]uint64
-}
-
 type Network struct {
 	InterfaceIndex    uint32
 	SubInterfaceIndex uint32
-	_                 [7]uint64
 }
 
 type Socket struct {
@@ -27,8 +23,6 @@ type Socket struct {
 	LocalPort        uint16
 	RemotePort       uint16
 	Protocol         uint8
-	_                [3]uint8
-	_                uint32
 }
 
 type Flow struct {
@@ -40,8 +34,6 @@ type Flow struct {
 	LocalPort        uint16
 	RemotePort       uint16
 	Protocol         uint8
-	_                [3]uint8
-	_                uint32
 }
 
 type Reflect struct {
@@ -50,9 +42,6 @@ type Reflect struct {
 	layer     uint32
 	Flags     uint64
 	Priority  int16
-	_         int16
-	_         int32
-	_         [4]uint64
 }
 
 func (r *Reflect) Layer() Layer {
@@ -65,7 +54,7 @@ type Address struct {
 	event     uint8
 	Flags     uint8
 	_         uint8
-	length    uint32
+	_         uint32
 	union     [64]uint8
 }
 
@@ -110,6 +99,7 @@ func (a *Address) UnsetOutbound() {
 }
 
 func (a *Address) Loopback() bool {
+	log.Printf("flag:%X", a.Flags)
 	return (a.Flags & uint8(0x01<<2)) == uint8(0x01<<2)
 }
 
@@ -181,17 +171,14 @@ func (a *Address) UnsetUDPChecksum() {
 	a.Flags &= ^uint8(0x01 << 7)
 }
 
+/*
 func (a *Address) Length() uint32 {
 	return a.length >> 12
 }
 
 func (a *Address) SetLength(n uint32) {
 	a.length = n << 12
-}
-
-func (a *Address) Ethernet() *Ethernet {
-	return (*Ethernet)(unsafe.Pointer(&a.union))
-}
+}*/
 
 func (a *Address) Network() *Network {
 	return (*Network)(unsafe.Pointer(&a.union))

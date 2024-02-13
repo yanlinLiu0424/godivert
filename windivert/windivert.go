@@ -2,6 +2,7 @@ package windivert
 
 import (
 	"errors"
+	"fmt"
 	"runtime"
 	"syscall"
 	"unsafe"
@@ -136,40 +137,35 @@ func (wd *WinDivertHandle) Recv() (*Packet, error) {
 	return packet, nil
 }
 
-/*
 // Divert a packet from the Network Stack
 // https://reqrypt.org/windivert-doc.html#divert_recv_ex
-func (wd *WinDivertHandle) RecvEx() ([]*Packet, error) {
+func (wd *WinDivertHandle) RecvEx() ([]byte, []Address, error) {
 	if !wd.open {
-		return nil, errors.New("can't receiveEx, the handle isn't open")
+		return nil, nil, errors.New("can't receiveEx, the handle isn't open")
 	}
 	quantity := 10
 	packetBuffer := make([]byte, PacketBufferSize*quantity)
 
 	var packetLen uint
-	var addr [10]WinDivertAddress
-	addrlen := uint(unsafe.Sizeof(addr))
+	addr := make([]Address, quantity)
+	addrlen := uint(unsafe.Sizeof(Address{})) * uint(quantity)
 	success, _, err := winDivertRecvEx.Call(wd.handle,
 		uintptr(unsafe.Pointer(&packetBuffer[0])),
-		uintptr(15000),
+		uintptr(PacketBufferSize*quantity),
 		uintptr(unsafe.Pointer(&packetLen)),
 		uintptr(0),
-		uintptr(unsafe.Pointer(&addr)),
+		uintptr(unsafe.Pointer(&addr[0])),
 		uintptr(unsafe.Pointer(&addrlen)),
 		uintptr(0))
 
 	if success == 0 {
-		return nil, err
+		return nil, nil, err
 	}
-
-	packets, err := wd.HelperParsePacket(packetBuffer, packetLen, addr)
-	if err != nil {
-		return nil, err
-	}
-
-	return packets, nil
+	packets := packetBuffer[:packetLen]
+	len := addrlen / uint(unsafe.Sizeof(Address{}))
+	addrs := addr[:len]
+	return packets, addrs, nil
 }
-*/
 
 // Inject the packet on the Network Stack
 // https://reqrypt.org/windivert-doc.html#divert_send
@@ -190,6 +186,30 @@ func (wd *WinDivertHandle) Send(packet *Packet) (uint, error) {
 		return 0, err
 	}
 
+	return sendLen, nil
+}
+
+// Inject the mutipacket on the Network Stack
+// https://reqrypt.org/windivert-doc.html#divert_send_ex
+func (wd *WinDivertHandle) SendEx(packets []byte, addr []Address) (uint, error) {
+	var sendLen uint
+
+	if !wd.open {
+		return 0, errors.New("can't Send, the handle isn't open")
+	}
+	l := unsafe.Sizeof(Address{}) * uintptr(len(addr))
+	success, _, err := winDivertSendEx.Call(wd.handle,
+		uintptr(unsafe.Pointer(&packets[0])),
+		uintptr(len(packets)),
+		uintptr(0),
+		uintptr(0),
+		uintptr(unsafe.Pointer(&addr[0])),
+		uintptr(l),
+		uintptr(0))
+
+	if success == 0 {
+		return 0, err
+	}
 	return sendLen, nil
 }
 
@@ -318,25 +338,42 @@ func (wd *WinDivertHandle) recvLoop(packetChan chan<- *Packet) {
 	}
 }
 
-//not implement
-// A loop that capture packets by calling Recv and sends them on a channel as long as the handle is open
-// If Recv() returns an error, the loop is stopped and the channel is closed
-/*
 func (wd *WinDivertHandle) recvLoopEx(packetChan chan<- *Packet) {
 	for wd.open {
-		packet, err := wd.RecvEx()
+		bytes, addr, err := wd.RecvEx()
 		if err != nil {
-			panic(err)
-			break
+			continue
 		}
-		for _, p := range packet {
-			packetChan <- p
+		if len(addr) > 1 {
+			fmt.Printf("packet len:%v\n", len(addr))
+		}
+		switch len(addr) {
+		case 0:
+			continue
+		case 1:
+			packet := &Packet{
+				Raw:       bytes,
+				Addr:      &addr[0],
+				PacketLen: uint(len(bytes)),
+			}
+			packetChan <- packet
+		default:
+			for _, add := range addr {
+				temp := Packet{Raw: bytes}
+				l := temp.ToTalLength()
+				address := add
+				packet := &Packet{
+					Raw:       bytes[:l],
+					Addr:      &address,
+					PacketLen: uint(l),
+				}
+				bytes = bytes[l:]
+				packetChan <- packet
+			}
 		}
 
-		//packetChan <- packet
 	}
 }
-*/
 
 // Create a new channel that will be used to pass captured packets and returns it calls recvLoop to maintain a loop
 func (wd *WinDivertHandle) Packets() (chan *Packet, error) {
@@ -348,9 +385,6 @@ func (wd *WinDivertHandle) Packets() (chan *Packet, error) {
 	return packetChan, nil
 }
 
-//not implement
-// Create a new channel that will be used to pass captured packets and returns it calls recvLoop to maintain a loop
-/*
 func (wd *WinDivertHandle) PacketExs() (chan *Packet, error) {
 	if !wd.open {
 		return nil, errors.New("the handle isn't open")
@@ -359,4 +393,3 @@ func (wd *WinDivertHandle) PacketExs() (chan *Packet, error) {
 	go wd.recvLoopEx(packetChan)
 	return packetChan, nil
 }
-*/

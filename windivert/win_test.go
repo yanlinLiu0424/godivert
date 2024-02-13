@@ -1,8 +1,10 @@
 package windivert
 
 import (
+	"encoding/binary"
 	"fmt"
 	"log"
+	"net"
 	"testing"
 	"unsafe"
 )
@@ -45,4 +47,22 @@ func TestXXX(t *testing.T) {
 		packets = append(packets, p)
 	}
 	log.Print(len(packets))
+}
+
+func TestXxx1(t *testing.T) {
+	ifaces, err := net.Interfaces()
+	if err != nil {
+		log.Print(fmt.Errorf("localAddresses: %v\n", err.Error()))
+		return
+	}
+	for _, i := range ifaces {
+		fmt.Printf("interface:%v,name:%v\n", i.Index, i.Name)
+	}
+
+}
+func TestXx1x(t *testing.T) {
+	//addr := make([]Address, quantity)
+	b := []byte{0x00, 0x70}
+	v := int(binary.BigEndian.Uint16(b))
+	log.Print(v)
 }
