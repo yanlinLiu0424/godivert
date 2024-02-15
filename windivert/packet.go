@@ -1,6 +1,7 @@
 package windivert
 
 import (
+	"encoding/binary"
 	"fmt"
 	"net"
 
@@ -19,8 +20,8 @@ type Packet struct {
 	ipVersion      int
 	hdrLen         int
 	nextHeaderType uint8
-
-	parsed bool
+	totalLen       uint16
+	parsed         bool
 }
 
 // Parse the packet's headers
@@ -30,10 +31,14 @@ func (p *Packet) ParseHeaders() {
 		p.hdrLen = int((p.Raw[0] & 0xf) << 2)
 		p.nextHeaderType = p.Raw[9]
 		p.IpHdr = header.NewIPv4Header(p.Raw)
+		p.totalLen = binary.BigEndian.Uint16(p.Raw[2:4])
 	} else {
 		p.hdrLen = 40
 		p.nextHeaderType = p.Raw[6]
 		p.IpHdr = header.NewIPv6Header(p.Raw)
+		if v, ok := p.IpHdr.(*header.IPv6Header); ok {
+			p.totalLen = uint16(p.IpHdr.HeaderLen()) + v.PayloadLen()
+		}
 	}
 
 	switch p.nextHeaderType {
@@ -202,4 +207,11 @@ func (p *Packet) Direction() Direction {
 // Returns true if the packet matches the filter
 func (p *Packet) EvalFilter(filter string) (bool, error) {
 	return HelperEvalFilter(p, filter)
+}
+
+func (p *Packet) ToTalLength() uint16 {
+	if !p.parsed {
+		p.ParseHeaders()
+	}
+	return p.totalLen
 }

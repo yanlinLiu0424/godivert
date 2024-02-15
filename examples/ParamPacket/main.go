@@ -18,10 +18,10 @@ func checkPacketEx(wd *windivert.WinDivertHandle, packetChan <-chan *windivert.P
 			srp, _ := packet.SrcPort()
 			dp, _ := packet.DstPort()
 			fmt.Print(srcip, destip, srp, dp)*/
-			p, err := wd.HelperParsePacket(packet.Raw)
+			_, err := wd.HelperParsePacket(packet.Raw)
 			if err == nil {
-				log.Printf("payload len:%v", len(p))
-				log.Printf("packet len:%v", packet.PacketLen)
+				log.Printf("srcip:%v dstip:%v ", packet.SrcIP(), packet.DstIP())
+
 			}
 			wd.Send(packet)
 		}(wd, packet)
@@ -29,7 +29,7 @@ func checkPacketEx(wd *windivert.WinDivertHandle, packetChan <-chan *windivert.P
 	}
 }
 func main() {
-	winDivert, err := windivert.NewWinDivertHandle("tcp.DstPort==55")
+	winDivert, err := windivert.NewWinDivertHandle("true")
 	if err != nil {
 		panic(err)
 	}
@@ -48,7 +48,7 @@ func main() {
 			panic(err)
 		}*/
 
-	packetChan, err := winDivert.Packets()
+	packetChan, err := winDivert.PacketExs()
 	if err != nil {
 		panic(err)
 	}

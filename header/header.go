@@ -43,6 +43,20 @@ func ProtocolName(protocol uint8) string {
 		return "UDP"
 	case ICMPv6:
 		return "ICMPv6"
+	case HOPOPT:
+		return "IPv6 Hop-by-Hop Option"
+	case IPv6Encapsulation:
+		return "IPv6 Encapsulation"
+	case IPv6Route:
+		return "Routing Header for IPv6"
+	case IPv6Frag:
+		return "Fragment Header for IPv6"
+	case ESP:
+		return "Encapsulating Security Payload Header"
+	case AH:
+		return "Authentication Header"
+	case IPv6Opts:
+		return "Destination Options for IPv6"
 	default:
 		return "Unimplemented Protocol"
 	}
