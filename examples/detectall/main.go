@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"os"
 	"os/signal"
 
@@ -11,8 +10,8 @@ import (
 func checkPacket(wd *windivert.WinDivertHandle, packetChan <-chan *windivert.Packet) {
 	for packet := range packetChan {
 		go func(wd *windivert.WinDivertHandle, packet *windivert.Packet) {
-			raw, _ := wd.HelperParsePacket(packet.Raw)
-			log.Print(raw)
+			//raw, _ := wd.HelperParsePacket(packet.Raw)
+			//log.Print(raw)
 			packet.Send(wd)
 		}(wd, packet)
 
@@ -20,13 +19,13 @@ func checkPacket(wd *windivert.WinDivertHandle, packetChan <-chan *windivert.Pac
 }
 
 func main() {
-	winDivert, err := windivert.NewWinDivertHandle("tcp.DstPort==55")
+	winDivert, err := windivert.NewWinDivertHandle("!loopback")
 	if err != nil {
 		panic(err)
 	}
 	defer winDivert.Close()
 
-	packetChan, err := winDivert.Packets()
+	packetChan, err := winDivert.PacketExs()
 	if err != nil {
 		panic(err)
 	}

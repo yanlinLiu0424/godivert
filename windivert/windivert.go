@@ -138,19 +138,19 @@ func (wd *WinDivertHandle) Recv() (*Packet, error) {
 
 // Divert a packet from the Network Stack
 // https://reqrypt.org/windivert-doc.html#divert_recv_ex
-func (wd *WinDivertHandle) RecvEx() ([]byte, []Address, error) {
+func (wd *WinDivertHandle) RecvEx() ([]byte, []Address, uint, error) {
 	if !wd.open {
-		return nil, nil, errors.New("can't receiveEx, the handle isn't open")
+		return nil, nil, 0, errors.New("can't receiveEx, the handle isn't open")
 	}
-	quantity := 10
-	packetBuffer := make([]byte, PacketBufferSize*quantity)
-
+	quantity := uint(MaxPacketBufferSize / PacketBufferSize)
+	packetBuffer := make([]byte, MaxPacketBufferSize)
 	var packetLen uint
 	addr := make([]Address, quantity)
-	addrlen := uint(unsafe.Sizeof(Address{})) * uint(quantity)
+	size := uint(unsafe.Sizeof(Address{}))
+	addrlen := size * quantity
 	success, _, err := winDivertRecvEx.Call(wd.handle,
 		uintptr(unsafe.Pointer(&packetBuffer[0])),
-		uintptr(PacketBufferSize*quantity),
+		uintptr(MaxPacketBufferSize),
 		uintptr(unsafe.Pointer(&packetLen)),
 		uintptr(0),
 		uintptr(unsafe.Pointer(&addr[0])),
@@ -158,12 +158,12 @@ func (wd *WinDivertHandle) RecvEx() ([]byte, []Address, error) {
 		uintptr(0))
 
 	if success == 0 {
-		return nil, nil, err
+		return nil, nil, 0, err
 	}
 	packets := packetBuffer[:packetLen]
-	len := addrlen / uint(unsafe.Sizeof(Address{}))
+	len := addrlen / size
 	addrs := addr[:len]
-	return packets, addrs, nil
+	return packets, addrs, len, nil
 }
 
 // Inject the packet on the Network Stack
@@ -339,13 +339,11 @@ func (wd *WinDivertHandle) recvLoop(packetChan chan<- *Packet) {
 
 func (wd *WinDivertHandle) recvLoopEx(packetChan chan<- *Packet) {
 	for wd.open {
-		bytes, addr, err := wd.RecvEx()
+		bytes, addr, count, err := wd.RecvEx()
 		if err != nil {
 			continue
 		}
-		switch len(addr) {
-		case 0:
-			continue
+		switch count {
 		case 1:
 			packet := &Packet{
 				Raw:       bytes,
@@ -363,8 +361,8 @@ func (wd *WinDivertHandle) recvLoopEx(packetChan chan<- *Packet) {
 					Addr:      &address,
 					PacketLen: uint(l),
 				}
-				bytes = bytes[l:]
 				packetChan <- packet
+				bytes = bytes[l:]
 			}
 		}
 
