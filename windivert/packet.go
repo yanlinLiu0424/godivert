@@ -35,10 +35,9 @@ func (p *Packet) ParseHeaders() {
 	} else {
 		p.hdrLen = 40
 		p.nextHeaderType = p.Raw[6]
-		p.IpHdr = header.NewIPv6Header(p.Raw)
-		if v, ok := p.IpHdr.(*header.IPv6Header); ok {
-			p.totalLen = uint16(p.IpHdr.HeaderLen()) + v.PayloadLen()
-		}
+		header := header.NewIPv6Header(p.Raw)
+		p.IpHdr = header
+		p.totalLen = uint16(p.IpHdr.HeaderLen()) + header.PayloadLen()
 	}
 
 	switch p.nextHeaderType {

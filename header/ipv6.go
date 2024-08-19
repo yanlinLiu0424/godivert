@@ -15,24 +15,10 @@ type IPv6Header struct {
 }
 
 func NewIPv6Header(raw []byte) *IPv6Header {
-	hl := IPv6HeaderLen
-	n := raw[6]
-	switch n {
-	case HOPOPT, IPv6Route, IPv6Frag, ESP, AH, IPv6Opts:
-		hl = hl + IPvExtensionLen
-		b := true
-		for b {
-			r := raw[:hl]
-			switch r[hl-IPvExtensionLen] {
-			case HOPOPT, IPv6Route, IPv6Frag, ESP, AH, IPv6Opts:
-				hl = hl + IPvExtensionLen
-			default:
-				b = false
-			}
-		}
-	}
+	l := binary.BigEndian.Uint16(raw[4:6])
+
 	return &IPv6Header{
-		Raw: raw[:hl],
+		Raw: raw[:l+IPv6HeaderLen],
 	}
 }
 
