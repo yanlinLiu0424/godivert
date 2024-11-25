@@ -1,6 +1,7 @@
 package windivert
 
 import (
+	"encoding/binary"
 	"errors"
 	"runtime"
 	"syscall"
@@ -353,8 +354,10 @@ func (wd *WinDivertHandle) recvLoopEx(packetChan chan<- *Packet) {
 			packetChan <- packet
 		default:
 			for _, add := range addr {
-				temp := Packet{Raw: bytes}
-				l := temp.ToTalLength()
+				l, err := caculateLen(bytes)
+				if err != nil {
+					continue
+				}
 				address := add
 				packet := &Packet{
 					Raw:       bytes[:l],
@@ -386,4 +389,15 @@ func (wd *WinDivertHandle) PacketExs() (chan *Packet, error) {
 	packetChan := make(chan *Packet, PacketChanCapacity)
 	go wd.recvLoopEx(packetChan)
 	return packetChan, nil
+}
+
+func caculateLen(raw []byte) (uint16, error) {
+	ipVersion := int(raw[0] >> 4)
+	switch ipVersion {
+	case 4:
+		return binary.BigEndian.Uint16(raw[2:4]), nil
+	case 6:
+		return binary.BigEndian.Uint16(raw[4:6]) + 40, nil
+	}
+	return 0, errors.New("error packet")
 }
